@@ -1,0 +1,11 @@
+master.name = silken
+slave.name = silken
+
+db.name = ali
+db.user = root
+db.password = shibuya
+
+metrics{
+ip = 0.0.0.0
+port = 4040
+}
