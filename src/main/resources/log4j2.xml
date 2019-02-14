@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration monitorInterval="60" status="TRACE">
     <Properties>
-        <Property name="baseDir">/var/log/goldpan</Property>
+        <Property name="baseDir">/var/log/dbench</Property>
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} %F:%L [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
 
-        <RollingFile name="RollingFile" fileName="${baseDir}/goldpan.log" bufferedIO="true" bufferSize="4096">
-            <FilePattern>${baseDir}/goldpan-%d{yyyy-MM-dd}-%i.log.gz</FilePattern>
+        <RollingFile name="RollingFile" fileName="${baseDir}/dbench.log" bufferedIO="true" bufferSize="4096">
+            <FilePattern>${baseDir}/dbench-%d{yyyy-MM-dd}-%i.log.gz</FilePattern>
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} %F:%L [%t] %-5level %logger{36} - %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>

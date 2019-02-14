@@ -24,6 +24,10 @@ class MysqlConnector(val config: Config, val metrics: Metrics) {
                 driverClassName = "com.mysql.jdbc.Driver"
                 maximumPoolSize = 1000
                 minimumIdle = 100
+                connectionTimeout = 250
+                validationTimeout = 250
+                idleTimeout=10000
+
             }
 
     val dsMaster = HikariDataSource(configMaster)
@@ -37,12 +41,18 @@ class MysqlConnector(val config: Config, val metrics: Metrics) {
                 driverClassName = "com.mysql.jdbc.Driver"
                 maximumPoolSize = 1000
                 minimumIdle = 100
+                connectionTimeout = 250
+                validationTimeout = 250
+                idleTimeout=10000
+
+
             }
 
     val dsSlave = HikariDataSource(configSlave)
 
 
     fun masterConnection(): Connection {
+
         return dsMaster.connection
     }
 

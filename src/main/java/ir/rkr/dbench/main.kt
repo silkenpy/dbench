@@ -27,41 +27,60 @@ fun main(args: Array<String>) {
 
     val mysql = MysqlConnector(config, metrics)
 
-    mysql.masterConnection().use { it ->
-        it.createStatement().execute("create table IF NOT EXISTS `test` (ID bigint, NAME varchar(50));")
-    }
+//    mysql.masterConnection().use { it ->
+//        it.createStatement().execute("create table IF NOT EXISTS `test` (ID bigint, NAME varchar(50));")
+//    }
 
+
+    val numThreads = config.getInt("numThreads")
+    val perThread = config.getInt("perThread")
 
     val stopwatch = Stopwatch.createStarted()
+    val insertedToMaster = AtomicLong()
+    val insertedToSlave = AtomicLong()
+    val notInserted = AtomicLong()
 
-    val selected = AtomicLong()
-    for (i in 1..100) {
+    for (i in 1..numThreads) {
         thread {
+            for (j in 1..perThread) {
 
-            mysql.masterConnection().use { connection ->
 
-                for (j in 1..10000) {
+                try {
+                    mysql.masterConnection().use { connection ->
 
-                    try {
-                        connection.prepareStatement("INSERT into test (ID,NAME) values ($i,\'salam $i\')").execute()
-                        selected.incrementAndGet()
+                        if (connection.isValid(50)) {
+                            connection.prepareStatement("INSERT into test (ID,NAME) values ($i,\'salam $i\')").executeUpdate()
+                            insertedToMaster.incrementAndGet()
 
-                    } catch (e: Exception) {
-                        mysql.slaveConnection().use { connection ->
-                            connection.prepareStatement("INSERT into test (ID,NAME) values ($i,\'salam $i\')").execute()
-                            selected.incrementAndGet()
-
+                        } else {
+                            throw Exception("Master Connection is not valid")
                         }
                     }
-                }
+                } catch (e: Exception) {
 
+                    try {
+                        mysql.slaveConnection().use { connection ->
+                            if (connection.isValid(50)) {
+                                connection.prepareStatement("INSERT into test (ID,NAME) values ($i,\'salam $i\')").executeUpdate()
+                                insertedToSlave.incrementAndGet()
+                            } else {
+                                throw Exception("Slave Connection is not valid")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        notInserted.incrementAndGet()
+                        println("InsertedToMaster: ${insertedToMaster.get()}  , InsertedToSlave ${insertedToSlave.get()} , notInserted : ${notInserted.get()} ")
+                    }
+                }
             }
         }
     }
 
-    while (selected.get() != 2000000L) {
-     Thread.sleep(100)
+    while ( (insertedToMaster.get() + insertedToSlave.get() + notInserted.get() ) != (numThreads * perThread).toLong()) {
+        Thread.sleep(100)
     }
     println(stopwatch.elapsed(TimeUnit.MILLISECONDS))
+    println("InsertedToMaster: ${insertedToMaster.get()}  , InsertedToSlave ${insertedToSlave.get()} , notInserted : ${notInserted.get()} ")
+    println("Rate: ${(numThreads * perThread).toDouble() / stopwatch.elapsed(TimeUnit.SECONDS)}")
     System.exit(0)
 }

@@ -1,6 +1,9 @@
 master.name = silken
 slave.name = silken
 
+numThreads=100
+perThread=10000
+
 db.name = ali
 db.user = root
 db.password = shibuya
