@@ -18,10 +18,12 @@ class MysqlConnector(val config: Config, val metrics: Metrics) {
 
     val configMaster = HikariConfig()
             .apply {
-                jdbcUrl = "jdbc:mysql://$master:3306/$db"
+//                jdbcUrl = "jdbc:mysql://$master:3306/$db"
+                jdbcUrl = "jdbc:mariadb:loadbalance//$master,$slave:3306/$db"
                 username = user
                 password = pwd
-                driverClassName = "com.mysql.jdbc.Driver"
+//                driverClassName = "com.mysql.jdbc.Driver"
+                driverClassName = "org.mariadb.jdbc.Driver"
                 maximumPoolSize = 1000
                 minimumIdle = 100
                 connectionTimeout = 250
@@ -38,7 +40,8 @@ class MysqlConnector(val config: Config, val metrics: Metrics) {
                 jdbcUrl = "jdbc:mysql://$slave:3306/$db"
                 username = user
                 password = pwd
-                driverClassName = "com.mysql.jdbc.Driver"
+//                driverClassName = "com.mysql.jdbc.Driver"
+                driverClassName = "org.mariadb.jdbc.Driver"
                 maximumPoolSize = 1000
                 minimumIdle = 100
                 connectionTimeout = 250
