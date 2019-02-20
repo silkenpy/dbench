@@ -7,6 +7,10 @@ perThread=10000
 db.name = ali
 db.user = root
 db.password = shibuya
+jdbcUrlMaster = "jdbc:mysql:loadbalance//master,slave:3306"
+jdbcUrlSlave = "jdbc:mysql:loadbalance//slave:3306"
+className = com.mysql.jdbc.Driver
+//className = org.mariadb.jdbc.Driver
 
 metrics{
 ip = 0.0.0.0
