@@ -3,14 +3,25 @@ slave.name = silken
 
 numThreads=100
 perThread=10000
+startFrom=10000
+mode=write
+
+tableName=Message
+sqlType=postgres
 
 db.name = ali
 db.user = root
 db.password = shibuya
-jdbcUrlMaster = "jdbc:mysql:loadbalance//master,slave:3306"
-jdbcUrlSlave = "jdbc:mysql:loadbalance//slave:3306"
-className = com.mysql.jdbc.Driver
-//className = org.mariadb.jdbc.Driver
+
+db.jdbcUrlMaster = "jdbc:mysql:loadbalance//master,slave:3306"
+db.jdbcUrlSlave = "jdbc:mysql:loadbalance//slave:3306"
+
+db.jdbcUrlMaster = "jdbc:postgresql://master,slave:5432"
+db.jdbcUrlSlave = "jdbc:postgresql://slave:5432"
+
+db.className = "org.postgresql.ds.PGSimpleDataSource"
+//db.className = com.mysql.jdbc.Driver
+//db.className = org.mariadb.jdbc.Driver
 
 metrics{
 ip = 0.0.0.0
