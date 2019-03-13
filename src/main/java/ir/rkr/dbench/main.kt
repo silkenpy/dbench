@@ -1,6 +1,7 @@
 package ir.rkr.dbench
 
 import com.google.common.base.Stopwatch
+import com.google.common.util.concurrent.RateLimiter
 import com.typesafe.config.ConfigFactory
 import ir.rkr.dbench.MysqlConnector.MysqlConnector
 import ir.rkr.dbench.rest.JettyRestServer
@@ -66,6 +67,10 @@ fun main(args: Array<String>) {
     val logger = KotlinLogging.logger {}
     val config = ConfigFactory.defaultApplication()
     val metrics = Metrics()
+    val writeRate = RateLimiter.create(config.getDouble("writeRateLimit"))
+    val readRate  = RateLimiter.create(config.getDouble("readRateLimit"))
+    val sleepTime  = config.getLong("sleepTime")
+
 
     JettyRestServer(config, metrics)
 
@@ -95,6 +100,7 @@ fun main(args: Array<String>) {
             thread {
                 for (j in startFrom + 1..startFrom + perThread) {
 
+                    if (!writeRate.tryAcquire()) Thread.sleep(sleepTime)
 
                     try {
                         mysql.masterConnection().use { connection ->
@@ -144,13 +150,19 @@ fun main(args: Array<String>) {
         for (i in 1..numThreads) {
             thread {
                 for (j in startFrom + 1..startFrom + perThread) {
+
+                    if (!readRate.tryAcquire()) Thread.sleep(sleepTime)
+
                     try {
                         mysql.masterConnection().use { connection ->
                             if (connection.isValid(100)) {
-                                val res = connection.prepareStatement("select * from ali.$tableName where `userId`=$i and peerId=$i and `randomId`=$j and `messageId`=$j limit 10;").executeQuery()
+                                if (sqlType == "mysql")
+                                    connection.prepareStatement("select * from  $tableName where `userId`=$i and peerId=$i and `randomId`=$j and `messageId`=$j limit 10;").executeQuery()
+                                else
+                                    connection.prepareStatement("select * from  $tableName where userId=$i and peerId=$i and randomId=$j and messageId=$j limit 10;").executeQuery()
                                 sqlOnMaster.incrementAndGet()
 
-                                logger.debug { resultsetToJson(res) }
+//                                logger.debug { resultsetToJson(res) }
 
                             } else {
                                 throw Exception("Master Connection is not valid")

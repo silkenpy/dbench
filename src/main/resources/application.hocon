@@ -6,6 +6,10 @@ perThread=10000
 startFrom=10000
 mode=write
 
+writeRateLimit = 20000
+readRateLimit  = 20000
+sleepTime = 50
+
 tableName=Message
 sqlType=postgres
 
@@ -13,15 +17,15 @@ db.name = ali
 db.user = root
 db.password = shibuya
 
-db.jdbcUrlMaster = "jdbc:mysql:loadbalance//master,slave:3306"
-db.jdbcUrlSlave = "jdbc:mysql:loadbalance//slave:3306"
-
-db.jdbcUrlMaster = "jdbc:postgresql://master,slave:5432"
-db.jdbcUrlSlave = "jdbc:postgresql://slave:5432"
-
-db.className = "org.postgresql.ds.PGSimpleDataSource"
+//db.jdbcUrlMaster = "jdbc:mysql:loadbalance//master,slave:3306"
+//db.jdbcUrlSlave = "jdbc:mysql:loadbalance//slave:3306"
 //db.className = com.mysql.jdbc.Driver
 //db.className = org.mariadb.jdbc.Driver
+
+db.jdbcUrlMaster = "jdbc:postgresql://localhost:5432"
+db.jdbcUrlSlave = "jdbc:postgresql://localhost:5432"
+db.className = "org.postgresql.ds.PGSimpleDataSource"
+
 
 metrics{
 ip = 0.0.0.0
